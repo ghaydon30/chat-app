@@ -16,9 +16,6 @@ const Screen2 = ({ route, navigation }) => {
 }
 
 const styles = StyleSheet.create({
-  // background: {
-  //   backgroundColor: backgroundColor
-  // },
   container: {
     flex: 1,
     justifyContent: 'center',

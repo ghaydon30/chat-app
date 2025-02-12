@@ -61,12 +61,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    // flex: 1,
-    // justifyContent: 'flex-end',
-    // alignItems: 'center',
-    // height: '44%',
-    // marginBottom: 40,
-    // backgroundColor: '#ffffff'
     height: "44%",
     width: "88%",
     justifyContent: 'space-between',
@@ -82,15 +76,6 @@ const styles = StyleSheet.create({
     margin: 25,
     marginTop: 75
   },
-  // contentContainer: {
-  //   backgroundColor: '#ffffff', 
-  //   // backgroundColor: '#f2f2f2',
-  //   borderRadius: 4,
-  //   width: '88%',
-  //   height: '50%', 
-  //   alignItems: 'center',
-  //   justifyContent: 'space-around', 
-  // },
   textInput: {
     width: "88%",
     padding: 15,
