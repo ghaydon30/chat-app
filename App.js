@@ -9,6 +9,15 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Start from './components/Start';
 import Chat from './components/Chat';
 
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'Bubble uses the legacy contextTypes API',
+  'MessageText uses the legacy contextTypes API',
+  'GiftedChat uses the legacy childContextTypes API',
+  'A props object containing a "key" prop is being spread into JSX',
+]);
+
 const App = () => {
   
   // Create the navigator
