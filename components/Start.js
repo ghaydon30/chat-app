@@ -8,7 +8,9 @@ import {
   ImageBackground,
   Platform,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 // Main Start screen component
 const Start = ({ navigation }) => {
@@ -20,6 +22,8 @@ const Start = ({ navigation }) => {
 
   // Available background color options
   const colors = ['#090C08', '#474056', '#8A95A5', '#B9C6AE'];
+
+  const auth = getAuth();
 
   // Start screen UI content wrapped in ImageBackground
   const content = (
@@ -67,12 +71,19 @@ const Start = ({ navigation }) => {
           accessibilityRole="button"
           accessibilityHint="Lets you choose to enter the chat room"
           style={styles.button}
-          onPress={() =>
-            navigation.navigate('Chat', {
-              name,
-              backgroundColor: selectedColor,
-            })
-          }
+          onPress={() => {
+            signInAnonymously(auth)
+              .then((result) => {
+                navigation.navigate('Chat', {
+                  name,
+                  backgroundColor: selectedColor,
+                  uid: result.user.uid,
+                });
+              })
+              .catch((error) => {
+                Alert.alert('Login failed', error.message);
+              });
+          }}
         >
           <Text style={styles.buttonText}>Start Chatting</Text>
         </TouchableOpacity>
@@ -100,32 +111,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    height: "44%",
-    width: "88%",
+    height: '44%',
+    width: '88%',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: "#fff",
-    padding: 15
+    backgroundColor: '#fff',
+    padding: 15,
   },
   appTitle: {
     flex: 1,
-    fontSize: 45, 
-    fontWeight: '600', 
+    fontSize: 45,
+    fontWeight: '600',
     color: '#FFFFFF',
     margin: 25,
-    marginTop: 75
+    marginTop: 75,
   },
   textInput: {
-    width: "88%",
+    width: '88%',
     padding: 15,
     borderWidth: 1,
     marginTop: 15,
     marginBottom: 15,
-    fontSize: 16
-  }, 
+    fontSize: 16,
+  },
   chooseBackgroundText: {
-    fontSize: 16, 
-    fontWeight: 300, 
+    fontSize: 16,
+    fontWeight: 300,
     color: '#757083',
     opacity: '100%',
   },
@@ -140,9 +151,9 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
-  button:{
+  button: {
     alignItems: 'center',
     backgroundColor: '#757083',
     borderRadius: 4,
@@ -155,7 +166,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
-  }
+  },
 });
 
 export default Start;
