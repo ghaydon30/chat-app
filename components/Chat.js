@@ -6,7 +6,9 @@ import {
   Platform,
   Keyboard,
 } from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   collection,
@@ -22,41 +24,74 @@ if (!Keyboard.removeListener) {
 }
 
 // Main Chat screen component
-const Chat = ({ route, navigation, db }) => {
-  // Extract user info and screen styling props
+const Chat = ({ route, navigation, db, isConnected }) => {
   const { name, backgroundColor, uid } = route.params;
-
-  // State to store chat messages
   const [messages, setMessages] = useState([]);
+
+  // Store messages locally
+  const cacheMessages = async (messagesToCache) => {
+    try {
+      await AsyncStorage.setItem(
+        'cached_messages',
+        JSON.stringify(messagesToCache)
+      );
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // Load messages from local storage
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadCachedMessages = async () => {
+    try {
+      const cached = (await AsyncStorage.getItem('cached_messages')) || '[]';
+      setMessages(JSON.parse(cached));
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Set screen title and connect to Firestore
   useEffect(() => {
     navigation.setOptions({ title: name });
 
     // Firestore real-time listener
-    const messagesQuery = query(
-      collection(db, 'messages'),
-      orderBy('createdAt', 'desc')
-    );
+    let unsubscribe;
 
-    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-      const loadedMessages = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          _id: doc.id,
-          ...data,
-          createdAt: data.createdAt.toDate(),
-        };
+    if (isConnected === true) {
+      const messagesQuery = query(
+        collection(db, 'messages'),
+        orderBy('createdAt', 'desc')
+      );
+
+      unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+        const loadedMessages = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            _id: doc.id,
+            ...data,
+            createdAt: data.createdAt.toDate(),
+          };
+        });
+        cacheMessages(loadedMessages);
+        setMessages(loadedMessages);
       });
-      setMessages(loadedMessages);
-    });
-
-    return unsubscribe;
-  }, []);
+    } else {
+      loadCachedMessages(); // load cached messages if offline
+    }
+    return () => {
+      if (unsubscribe) unsubscribe(); // clean up listener
+    };
+  }, [isConnected]); // re-run when connection changes
 
   // Send message to Firestore
   const onSend = async (newMessages = []) => {
-    await addDoc(collection(db, 'messages'), newMessages[0]);
+    if (isConnected) {
+      await addDoc(collection(db, 'messages'), newMessages[0]);
+    }
   };
 
   // Customizes the appearance of message bubbles
@@ -65,11 +100,17 @@ const Chat = ({ route, navigation, db }) => {
       <Bubble
         {...props}
         wrapperStyle={{
-          left: { backgroundColor: '#FFF' },   // Received messages
-          right: { backgroundColor: '#000' },  // Sent messages
+          left: { backgroundColor: '#FFF' }, // Received messages
+          right: { backgroundColor: '#000' }, // Sent messages
         }}
       />
     );
+  };
+
+  // Custom input bar: hide when offline
+  const renderInputToolbar = (props) => {
+    if (isConnected) return <InputToolbar {...props} />;
+    return null;
   };
 
   // Wraps chat in KeyboardAvoidingView to handle keyboard visibility on iOS/Android
@@ -83,6 +124,7 @@ const Chat = ({ route, navigation, db }) => {
         onSend={onSend}
         user={{ _id: uid, name: name }}
         renderBubble={renderBubble}
+        renderInputToolbar={renderInputToolbar}
         renderTime={() => null}
         renderDay={() => null}
       />

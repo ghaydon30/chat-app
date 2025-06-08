@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import { StyleSheet, Text, View, Button, Alert } from 'react-native';
 
 // import react Navigation
 import { NavigationContainer } from '@react-navigation/native';
@@ -7,7 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // import Firebase Modules
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 // import screens
@@ -15,6 +15,10 @@ import Start from './components/Start';
 import Chat from './components/Chat';
 
 import { LogBox } from 'react-native';
+
+// Add: NetInfo to detect connection
+import { useNetInfo } from '@react-native-community/netinfo';
+import { useEffect } from 'react';
 
 LogBox.ignoreLogs([
   'Bubble uses the legacy contextTypes API',
@@ -41,6 +45,18 @@ const App = () => {
   // Create the navigator
   const Stack = createNativeStackNavigator();
 
+  // Monitor connection status
+  const connectionStatus = useNetInfo();
+
+  useEffect(() => {
+    if (connectionStatus.isConnected === false) {
+      Alert.alert('Connection lost!');
+      disableNetwork(db);
+    } else if (connectionStatus.isConnected === true) {
+      enableNetwork(db);
+    }
+  }, [connectionStatus.isConnected]);
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Start">
@@ -48,7 +64,13 @@ const App = () => {
           {(props) => <Start auth={auth} {...props} />}
         </Stack.Screen>
         <Stack.Screen name="Chat">
-          {(props) => <Chat db={db} {...props} />}
+          {(props) => (
+            <Chat
+              db={db}
+              isConnected={connectionStatus.isConnected}
+              {...props}
+            />
+          )}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
