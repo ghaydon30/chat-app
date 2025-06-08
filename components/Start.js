@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, View, Text, Button, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
 
-const Screen1 = ({ navigation }) => {
+const Start = ({ navigation }) => {
   const [name, setName] = useState('');
 
   const colors = [
@@ -33,8 +33,8 @@ const Screen1 = ({ navigation }) => {
             <TouchableOpacity
               key={index}
               style={[styles.colorCircle, { backgroundColor: color }]}
-              onPress={() => navigation.navigate('Screen2', { name: name, backgroundColor: color })}
-              // onPress={() => navigation.navigate('Screen2', { name: name})}
+              onPress={() => navigation.navigate('Chat', { name: name, backgroundColor: color })}
+              // onPress={() => navigation.navigate('Chat', { name: name})}
             />
           ))}
         </View>
@@ -43,7 +43,7 @@ const Screen1 = ({ navigation }) => {
            accessibilityRole="button"
            accessibilityHint="Lets you choose to enter the chat room"
            style={styles.button}
-           onPress={() => navigation.navigate('Screen2', { name: name})}
+           onPress={() => navigation.navigate('Chat', { name: name})}
          >
            <Text style={styles.buttonText}>Start Chatting</Text>
          </TouchableOpacity>
@@ -119,4 +119,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Screen1;
+export default Start;

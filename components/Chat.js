@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { useState, useEffect } from 'react';
+import { StyleSheet, View, KeyboardAvoidingView, Platform, Text } from 'react-native';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 
-const Screen2 = ({ route, navigation }) => {
+const Chat = ({ route, navigation }) => {
   const { name, backgroundColor } = route.params;
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     navigation.setOptions({ title: name });
@@ -23,4 +25,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Screen2;
+export default Chat;
